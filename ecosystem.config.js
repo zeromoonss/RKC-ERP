@@ -1,0 +1,41 @@
+module.exports = {
+  apps: [
+    {
+      name: 'rkc-api',
+      script: 'dist/main.js',
+      cwd: './apps/api',
+      instances: 1,
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        API_PORT: 4000,
+      },
+      env_file: './.env',
+      watch: false,
+      max_memory_restart: '500M',
+      error_file: './logs/api-error.log',
+      out_file: './logs/api-out.log',
+      merge_logs: true,
+      time: true,
+    },
+    {
+      name: 'rkc-web',
+      script: 'npm',
+      args: 'start',
+      cwd: './apps/web',
+      instances: 1,
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000,
+      },
+      env_file: './.env',
+      watch: false,
+      max_memory_restart: '500M',
+      error_file: './logs/web-error.log',
+      out_file: './logs/web-out.log',
+      merge_logs: true,
+      time: true,
+    },
+  ],
+};
