@@ -163,7 +163,7 @@ export default function SettingsPage() {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="vi-VN">Tiếng Việt</SelectItem>
-                  <SelectItem value="ko-KR">한국어</SelectItem>
+                  <SelectItem value="ko-KR">Korean</SelectItem>
                   <SelectItem value="en-US">English</SelectItem>
                 </SelectContent>
               </Select>
@@ -287,36 +287,36 @@ export default function SettingsPage() {
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Lock className="h-5 w-5 text-amber-600" />
-            비밀번호 변경
+            {t('changePassword')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label>현재 비밀번호</Label>
-              <Input type="password" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} placeholder="현재 비밀번호" />
+              <Label>{t('currentPassword')}</Label>
+              <Input type="password" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} placeholder={t('currentPasswordPlaceholder')} />
             </div>
             <div className="space-y-1.5">
-              <Label>새 비밀번호</Label>
-              <Input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder="6자 이상" />
+              <Label>{t('newPassword')}</Label>
+              <Input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder={t('newPasswordPlaceholder')} />
             </div>
             <div className="space-y-1.5">
-              <Label>비밀번호 확인</Label>
-              <Input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} placeholder="비밀번호 재입력" />
+              <Label>{t('confirmPassword')}</Label>
+              <Input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} placeholder={t('confirmPasswordPlaceholder')} />
             </div>
           </div>
           <Button
             variant="outline"
             disabled={changingPw || !currentPw || !newPw || newPw !== confirmPw || newPw.length < 6}
             onClick={async () => {
-              if (newPw !== confirmPw) { toast.error('비밀번호가 일치하지 않습니다'); return; }
+              if (newPw !== confirmPw) { toast.error(t('passwordMismatch')); return; }
               try {
                 setChangingPw(true);
                 await api.patch('/auth/change-password', { currentPassword: currentPw, newPassword: newPw });
-                toast.success('비밀번호가 변경되었습니다');
+                toast.success(t('passwordChanged'));
                 setCurrentPw(''); setNewPw(''); setConfirmPw('');
               } catch (err: any) {
-                toast.error(err.message || '비밀번호 변경 실패');
+                toast.error(err.message || t('passwordChangeFailed'));
               } finally {
                 setChangingPw(false);
               }
@@ -324,7 +324,7 @@ export default function SettingsPage() {
             className="border-amber-200 text-amber-700 hover:bg-amber-50"
           >
             {changingPw ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Lock className="h-4 w-4 mr-2" />}
-            비밀번호 변경
+            {t('changePassword')}
           </Button>
         </CardContent>
       </Card>

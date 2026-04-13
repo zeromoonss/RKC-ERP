@@ -187,7 +187,7 @@ export default function InvoicesPage() {
                         <DropdownMenuItem onClick={() => setSelected(inv)}><Eye className="h-4 w-4 mr-2" />{t('viewDetail')}</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => { window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/invoices/${inv.id}/html`, '_blank'); toast.success(t('downloadStarted')); }}><Download className="h-4 w-4 mr-2" />{t('download')}</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => { window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/invoices/${inv.id}/html`, '_blank'); }}><Printer className="h-4 w-4 mr-2" />{t('print')}</DropdownMenuItem>
-                        {inv.status !== 'VOIDED' && <DropdownMenuItem onClick={async () => { try { await api.patch(`/invoices/${inv.id}/void`, {}); toast.success('인보이스가 무효화되었습니다'); loadInvoices(); } catch { toast.error('Failed'); } }} className="text-red-500"><XCircle className="h-4 w-4 mr-2" />{t('voided')}</DropdownMenuItem>}
+                        {inv.status !== 'VOIDED' && <DropdownMenuItem onClick={async () => { try { await api.patch(`/invoices/${inv.id}/void`, {}); toast.success(t('voidSuccess')); loadInvoices(); } catch { toast.error('Failed'); } }} className="text-red-500"><XCircle className="h-4 w-4 mr-2" />{t('voided')}</DropdownMenuItem>}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>

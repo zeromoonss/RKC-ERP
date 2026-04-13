@@ -420,27 +420,27 @@ export default function StaffPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-600">
-              <Trash2 className="h-5 w-5" /> 스태프 삭제
+              <Trash2 className="h-5 w-5" /> {t('deleteTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              <strong>{deleteTarget?.name}</strong> ({deleteTarget?.email})을(를) 삭제하시겠습니까?
-              <br />이 작업은 되돌릴 수 없으며, 해당 직원의 계정이 완전히 삭제됩니다.
+              {t('deleteConfirm', { name: deleteTarget?.name || '', email: deleteTarget?.email || '' })}
+              <br />{t('deleteWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction className="bg-red-600 hover:bg-red-500 text-white" onClick={async () => {
               if (!deleteTarget) return;
               try {
                 await api.delete(`/users/${deleteTarget.id}`);
-                toast.success(`${deleteTarget.name} 스태프가 삭제되었습니다`);
+                toast.success(t('deleteSuccess'));
                 setDeleteTarget(null);
                 loadStaff();
               } catch (err: any) {
-                toast.error(err.message || '삭제 실패');
+                toast.error(err.message || t('deleteFailed'));
               }
             }}>
-              삭제
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
