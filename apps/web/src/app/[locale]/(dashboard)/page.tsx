@@ -64,9 +64,6 @@ const statusStyle = (status: string) => {
     default: return 'bg-gray-100 text-gray-500';
   }
 };
-const statusLabel: Record<string, string> = {
-  DRAFT: '초안', ISSUED: '발행', PARTIALLY_PAID: '부분납부', PAID: '납부완료', OVERDUE: '연체', CANCELLED: '취소',
-};
 const methodIcon = (method: string) => {
   switch (method) {
     case 'CARD': return <CreditCard className="h-3.5 w-3.5 text-blue-500" />;
@@ -75,7 +72,6 @@ const methodIcon = (method: string) => {
     default: return <Wallet className="h-3.5 w-3.5" />;
   }
 };
-const methodLabel: Record<string, string> = { CARD: '카드', BANK_TRANSFER: '이체', CASH: '현금' };
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
@@ -106,10 +102,10 @@ export default function DashboardPage() {
   }, []);
 
   const kpiCards = [
-    { key: 'totalStudents', value: data ? String(data.students.total) : '—', sub: `유치원 ${data?.students.kindergarten || 0} · 학원 ${data?.students.academy || 0}`, icon: Users, color: 'from-blue-600 to-indigo-500', bgColor: 'bg-blue-500/10' },
-    { key: 'totalBilled', value: data ? formatVND(data.billing.totalBilled) : '—', sub: '이번 달 총 청구', icon: Receipt, color: 'from-amber-600 to-orange-400', bgColor: 'bg-amber-500/10' },
-    { key: 'totalPaid', value: data ? formatVND(data.billing.totalPaid) : '—', sub: `수납률 ${data?.billing.collectionRate || 0}%`, icon: CreditCard, color: 'from-emerald-600 to-green-400', bgColor: 'bg-emerald-500/10' },
-    { key: 'receivables', value: data ? formatVND(data.receivables.totalAmount) : '—', sub: `${data?.receivables.count || 0}건 미수금`, icon: AlertCircle, color: 'from-red-600 to-rose-400', bgColor: 'bg-red-500/10' },
+    { key: 'totalStudents', value: data ? String(data.students.total) : '—', sub: `${t('kindergartenSub', { count: data?.students.kindergarten || 0 })} · ${t('academySub', { count: data?.students.academy || 0 })}`, icon: Users, color: 'from-blue-600 to-indigo-500', bgColor: 'bg-blue-500/10' },
+    { key: 'totalBilled', value: data ? formatVND(data.billing.totalBilled) : '—', sub: t('monthlyBilled'), icon: Receipt, color: 'from-amber-600 to-orange-400', bgColor: 'bg-amber-500/10' },
+    { key: 'totalPaid', value: data ? formatVND(data.billing.totalPaid) : '—', sub: t('collectionRateSub', { rate: data?.billing.collectionRate || 0 }), icon: CreditCard, color: 'from-emerald-600 to-green-400', bgColor: 'bg-emerald-500/10' },
+    { key: 'receivables', value: data ? formatVND(data.receivables.totalAmount) : '—', sub: t('receivablesSub', { count: data?.receivables.count || 0 }), icon: AlertCircle, color: 'from-red-600 to-rose-400', bgColor: 'bg-red-500/10' },
   ];
 
   return (
@@ -118,7 +114,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Royal Kids College 운영 현황</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{t('subtitle')}</p>
         </div>
         {isLoading && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -160,7 +156,7 @@ export default function DashboardPage() {
         <Card className="lg:col-span-2 border-slate-200 dark:border-slate-800">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" /> 반 현황
+              <GraduationCap className="h-5 w-5" /> {t('classSummary')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -176,11 +172,11 @@ export default function DashboardPage() {
                           <span className="font-medium text-sm">{cls.name}</span>
                         </div>
                         <Badge variant="outline" className="text-[10px]">
-                          {cls.classType === 'KINDERGARTEN' ? '유치원' : '학원'}
+                          {cls.classType === 'KINDERGARTEN' ? t('kindergarten') : t('academy')}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-                        <span>{cls.studentCount} / {cls.capacity}명</span>
+                        <span>{cls.studentCount} / {cls.capacity} {t('studentsUnit')}</span>
                         <span>{Math.round(ratio)}%</span>
                       </div>
                       <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
@@ -201,7 +197,7 @@ export default function DashboardPage() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">등록된 반이 없습니다</p>
+                <p className="text-sm">{t('noClasses')}</p>
               </div>
             )}
           </CardContent>
@@ -211,7 +207,7 @@ export default function DashboardPage() {
         <Card className="border-slate-200 dark:border-slate-800">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" /> 재정 요약
+              <TrendingUp className="h-5 w-5" /> {t('financialSummary')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -227,24 +223,24 @@ export default function DashboardPage() {
                 </svg>
                 <span className="absolute text-2xl font-bold">{data?.billing.collectionRate || 0}%</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">이번 달 수납률</p>
+              <p className="text-xs text-muted-foreground mt-2">{t('collectionRateLabel')}</p>
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between p-2.5 rounded-lg bg-muted/30">
-                <span className="text-muted-foreground">총 청구</span>
+                <span className="text-muted-foreground">{t('totalBilledLabel')}</span>
                 <span className="font-medium">{formatVND(data?.billing.totalBilled || 0)}</span>
               </div>
               <div className="flex justify-between p-2.5 rounded-lg bg-emerald-50/50">
-                <span className="text-emerald-600">수납 완료</span>
+                <span className="text-emerald-600">{t('totalPaidLabel')}</span>
                 <span className="font-medium text-emerald-600">{formatVND(data?.billing.totalPaid || 0)}</span>
               </div>
               <div className="flex justify-between p-2.5 rounded-lg bg-red-50/50">
-                <span className="text-red-600">미수금</span>
+                <span className="text-red-600">{t('receivablesLabel')}</span>
                 <span className="font-medium text-red-600">{formatVND(data?.receivables.totalAmount || 0)}</span>
               </div>
               <div className="flex justify-between p-2.5 rounded-lg bg-orange-50/50">
-                <span className="text-orange-600">지출</span>
+                <span className="text-orange-600">{t('expensesLabel')}</span>
                 <span className="font-medium text-orange-600">{formatVND(data?.expenses.totalAmount || 0)}</span>
               </div>
             </div>
@@ -258,7 +254,7 @@ export default function DashboardPage() {
         <Card className="border-slate-200 dark:border-slate-800">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Receipt className="h-5 w-5" /> 최근 청구
+              <Receipt className="h-5 w-5" /> {t('recentBillings')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -276,7 +272,7 @@ export default function DashboardPage() {
                     <div className="text-right">
                       <p className="text-sm font-medium">{formatVND(b.totalAmount)}</p>
                       <Badge variant="outline" className={`text-[10px] ${statusStyle(b.status)}`}>
-                        {statusLabel[b.status] || b.status}
+                        {t(`status_${b.status}`)}
                       </Badge>
                     </div>
                   </div>
@@ -285,7 +281,7 @@ export default function DashboardPage() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Receipt className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">청구 내역이 없습니다</p>
+                <p className="text-sm">{t('noBillings')}</p>
               </div>
             )}
           </CardContent>
@@ -295,7 +291,7 @@ export default function DashboardPage() {
         <Card className="border-slate-200 dark:border-slate-800">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Wallet className="h-5 w-5" /> 최근 수납
+              <Wallet className="h-5 w-5" /> {t('recentPayments')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -308,7 +304,7 @@ export default function DashboardPage() {
                       <div>
                         <p className="text-sm font-medium">{p.studentName}</p>
                         <p className="text-[10px] text-muted-foreground">
-                          {methodLabel[p.paymentMethod] || p.paymentMethod} · {new Date(p.paymentDate).toLocaleDateString()}
+                          {t(`method_${p.paymentMethod}`)} · {new Date(p.paymentDate).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -319,7 +315,7 @@ export default function DashboardPage() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Wallet className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">수납 내역이 없습니다</p>
+                <p className="text-sm">{t('noPayments')}</p>
               </div>
             )}
           </CardContent>
@@ -330,7 +326,7 @@ export default function DashboardPage() {
       {error && (
         <Card className="border-amber-200 bg-amber-50/50">
           <CardContent className="p-4">
-            <p className="text-sm text-amber-700">⚠️ API 연결 확인 필요: {error}</p>
+            <p className="text-sm text-amber-700">⚠️ {t('apiError')}: {error}</p>
           </CardContent>
         </Card>
       )}

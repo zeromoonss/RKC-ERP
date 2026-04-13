@@ -34,7 +34,8 @@ const formatVND = (amount: number) =>
 
 const monthLabel = (month: string) => {
   const [y, m] = month.split('-');
-  return `${y}년 ${parseInt(m)}월`;
+  const date = new Date(parseInt(y), parseInt(m) - 1);
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
 };
 
 export default function RoyaltyPage() {
