@@ -35,6 +35,8 @@ const PERMISSION_DEFINITIONS = [
   { code: 'billing.edit', name: 'Edit Billing', group: 'billing' },
   { code: 'billing.delete', name: 'Delete Billing', group: 'billing' },
   { code: 'class.delete', name: 'Delete Class', group: 'class' },
+  // Owner-only
+  { code: 'owner.transfer', name: 'Transfer Ownership', group: 'staff' },
 ];
 
 // Role definitions with their permission codes
@@ -49,14 +51,9 @@ const ROLE_DEFINITIONS = [
   {
     name: 'Admin',
     code: 'ADMIN',
-    description: 'Administrative operations',
+    description: 'Administrative operations (all except owner transfer)',
     isSystem: true,
-    permissions: [
-      'student.view', 'student.create', 'student.edit',
-      'class.view', 'class.create', 'class.assign_student', 'class.assign_teacher',
-      'billing.view', 'invoice.view', 'payment.view', 'receivable.view',
-      'dashboard.view',
-    ],
+    permissions: PERMISSION_DEFINITIONS.map(p => p.code).filter(c => c !== 'owner.transfer'),
   },
   {
     name: 'Finance',

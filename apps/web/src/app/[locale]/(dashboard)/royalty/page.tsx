@@ -110,8 +110,8 @@ export default function RoyaltyPage() {
                 <Info className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-amber-800">추정 데이터</p>
-                <p className="text-xs text-amber-600 mt-0.5">아직 발행된 청구서가 없어 청구 템플릿 × 활성 원생 수 기반 추정치를 표시합니다. 청구서를 발행하면 실제 데이터로 자동 전환됩니다.</p>
+                <p className="text-sm font-medium text-amber-800">{t('estimateTitle')}</p>
+                <p className="text-xs text-amber-600 mt-0.5">{t('estimateDesc')}</p>
               </div>
             </div>
           </CardContent>

@@ -224,7 +224,31 @@
     "lookupFailed": "Lookup failed",
     "heightLabel": "Height",
     "weightLabel": "Weight",
-    "visionLabel": "Vision"
+    "visionLabel": "Vision",
+    "editTitle": "Edit Student",
+    "basicInfo": "Basic Information",
+    "allergyLabel": "Has Allergy",
+    "allergyPlaceholder": "Allergy details (e.g. peanuts, shrimp, eggs)",
+    "lastCheckDate": "Last Check Date",
+    "nextCheckDate": "Next Check Date",
+    "notesPlaceholder": "Enter notes",
+    "deleteConfirmTitle": "Confirm Student Deletion",
+    "deleteConfirmDesc": "Permanently delete {name}? This action cannot be undone.",
+    "deleteSuccess": "Student has been deleted",
+    "deleteFailed": "Delete failed",
+    "withdrawNotice": "Withdrawal will remove all class assignments. Editing will be disabled; only re-enrollment will be possible.",
+    "withdrawReasonLabel": "Withdrawal Reason",
+    "withdrawReasonPlaceholder": "e.g. Graduation, Transfer, Personal reasons",
+    "reactivateTitle": "Re-enrollment",
+    "reactivateNotice": "Re-enrollment will change status to PENDING. Class assignment must be done separately.",
+    "reactivateReasonLabel": "Re-enrollment Reason",
+    "reactivateReasonPlaceholder": "e.g. Restored, Re-registered, Transfer in",
+    "assignedToClass": "Assigned to {name}",
+    "assignedCheck": "Assigned ✓",
+    "healthSaved": "Health check record saved",
+    "healthCheck": "Health Check",
+    "heightPrompt": "Height (cm):",
+    "delete": "Delete"
   },
   "classes": {
     "title": "Classes",
@@ -585,7 +609,9 @@
     "snackFee": "Snack Fee",
     "excluded": "Excluded from royalty",
     "calculation": "Royalty Calculation",
-    "monthlyRoyalty": "Monthly Royalty"
+    "monthlyRoyalty": "Monthly Royalty",
+    "estimateTitle": "Estimated Data",
+    "estimateDesc": "No invoices have been issued yet. Showing estimates based on billing templates × active student count. Data will auto-switch to actual figures once invoices are issued."
   },
   "footer": {
     "productBy": "product by yaholab"

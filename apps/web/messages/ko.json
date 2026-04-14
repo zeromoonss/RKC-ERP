@@ -224,7 +224,31 @@
     "lookupFailed": "조회 실패",
     "heightLabel": "키",
     "weightLabel": "몸무게",
-    "visionLabel": "시력"
+    "visionLabel": "시력",
+    "editTitle": "원생 정보 수정",
+    "basicInfo": "기본 정보",
+    "allergyLabel": "알러지 여부",
+    "allergyPlaceholder": "알러지 상세 (예: 땅콩, 새우, 계란 등)",
+    "lastCheckDate": "지난 검사일",
+    "nextCheckDate": "다음 검사 예정일",
+    "notesPlaceholder": "비고 입력",
+    "deleteConfirmTitle": "원생 삭제 확인",
+    "deleteConfirmDesc": "{name} 원생을 완전히 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "deleteSuccess": "원생이 삭제되었습니다",
+    "deleteFailed": "삭제 실패",
+    "withdrawNotice": "퇴원 처리 시 모든 반 배정이 해제됩니다. 이후 수정은 불가하며 재입원만 가능합니다.",
+    "withdrawReasonLabel": "퇴원 사유",
+    "withdrawReasonPlaceholder": "예: 졸업, 전원, 개인 사유 등",
+    "reactivateTitle": "재입원 처리",
+    "reactivateNotice": "재입원 시 PENDING 상태로 전환됩니다. 반 배정은 별도로 진행해 주세요.",
+    "reactivateReasonLabel": "재입원 사유",
+    "reactivateReasonPlaceholder": "예: 복원, 재등록, 전입 등",
+    "assignedToClass": "{name} 반에 배정됨",
+    "assignedCheck": "배정됨 ✓",
+    "healthSaved": "건강검진 기록 저장됨",
+    "healthCheck": "건강검진",
+    "heightPrompt": "키 (cm):",
+    "delete": "삭제"
   },
   "classes": {
     "title": "반운영",
@@ -585,7 +609,9 @@
     "snackFee": "스낵비",
     "excluded": "로열티 제외",
     "calculation": "로열티 계산식",
-    "monthlyRoyalty": "월간 로열티"
+    "monthlyRoyalty": "월간 로열티",
+    "estimateTitle": "추정 데이터",
+    "estimateDesc": "아직 발행된 청구서가 없어 청구 템플릿 × 활성 원생 수 기반 추정치를 표시합니다. 청구서를 발행하면 실제 데이터로 자동 전환됩니다."
   },
   "footer": {
     "productBy": "product by yaholab"

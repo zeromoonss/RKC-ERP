@@ -94,7 +94,7 @@ export default function ExpensesPage() {
 
   const handleCreateExpense = async () => {
     if (!createForm.title || !createForm.amount) {
-      toast.error('제목과 금액을 입력하세요');
+      toast.error(t('titleAndAmountRequired'));
       return;
     }
     try {
@@ -105,7 +105,7 @@ export default function ExpensesPage() {
         description: createForm.description || undefined,
         amount: parseInt(createForm.amount) || 0,
       });
-      toast.success('지출결의가 제출되었습니다');
+      toast.success(t('submitSuccess'));
       setShowCreate(false);
       setCreateForm({ title: '', category: 'Office Supplies', description: '', amount: '' });
       loadExpenses();
@@ -120,7 +120,7 @@ export default function ExpensesPage() {
     try {
       setIsLoading(true);
       await api.patch(`/expenses/${expense.id}/approve`, {});
-      toast.success(`"${expense.title}" 승인되었습니다`);
+      toast.success(t('approveSuccess'));
       setSelected(null);
       loadExpenses();
     } catch (err: any) {
@@ -134,7 +134,7 @@ export default function ExpensesPage() {
     try {
       setIsLoading(true);
       await api.patch(`/expenses/${expense.id}/reject`, {});
-      toast.success(`"${expense.title}" 반려되었습니다`);
+      toast.success(t('rejectSuccess'));
       setSelected(null);
       loadExpenses();
     } catch (err: any) {
@@ -326,10 +326,10 @@ export default function ExpensesPage() {
                   <Separator />
                   <div className="flex gap-2">
                     <Button className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white" onClick={() => handleApprove(selected)}>
-                      <CheckCircle2 className="h-4 w-4 mr-2" /> 승인
+                      <CheckCircle2 className="h-4 w-4 mr-2" /> {t('approve')}
                     </Button>
                     <Button variant="outline" className="flex-1 text-red-500 border-red-200 hover:bg-red-50" onClick={() => handleReject(selected)}>
-                      <XCircle className="h-4 w-4 mr-2" /> 반려
+                      <XCircle className="h-4 w-4 mr-2" /> {t('reject')}
                     </Button>
                   </div>
                 </>
@@ -343,15 +343,15 @@ export default function ExpensesPage() {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5" /> 지출결의 작성</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5" /> {t('createTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">제목</label>
-              <Input value={createForm.title} onChange={(e) => setCreateForm({...createForm, title: e.target.value})} placeholder="지출 내역 제목" />
+              <label className="text-sm font-medium">{t('titleLabel')}</label>
+              <Input value={createForm.title} onChange={(e) => setCreateForm({...createForm, title: e.target.value})} placeholder={t('titlePlaceholder')} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">카테고리</label>
+              <label className="text-sm font-medium">{t('categoryLabel')}</label>
               <Select value={createForm.category} onValueChange={(v) => setCreateForm({...createForm, category: v})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -360,18 +360,18 @@ export default function ExpensesPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">금액 (VND)</label>
+              <label className="text-sm font-medium">{t('amountLabel')} (VND)</label>
               <Input type="number" value={createForm.amount} onChange={(e) => setCreateForm({...createForm, amount: e.target.value})} placeholder="0" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">설명</label>
-              <Input value={createForm.description} onChange={(e) => setCreateForm({...createForm, description: e.target.value})} placeholder="상세 설명 (선택사항)" />
+              <label className="text-sm font-medium">{t('descriptionLabel')}</label>
+              <Input value={createForm.description} onChange={(e) => setCreateForm({...createForm, description: e.target.value})} placeholder={t('descriptionPlaceholder')} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreate(false)}>취소</Button>
+            <Button variant="outline" onClick={() => setShowCreate(false)}>{t('cancel')}</Button>
             <Button onClick={handleCreateExpense} className="bg-indigo-600 hover:bg-indigo-500 text-white">
-              <Send className="h-4 w-4 mr-2" /> 제출
+              <Send className="h-4 w-4 mr-2" /> {t('submit')}
             </Button>
           </DialogFooter>
         </DialogContent>

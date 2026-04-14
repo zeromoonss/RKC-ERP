@@ -173,7 +173,7 @@ export default function StudentsPage() {
   // Class assignment dialog state (for detail view)
   const [showClassAssign, setShowClassAssign] = useState(false);
 
-  // API에서 서버 필터링하므로 클라이언트 필터 불필요
+  // Server-side filtering via API, no client filter needed
   const filteredStudents = students;
 
   const openEditDialog = (student: Student) => {
@@ -211,12 +211,12 @@ export default function StudentsPage() {
         lastDentalCheckDate: editForm.lastDentalCheckDate || undefined,
         nextDentalCheckDate: editForm.nextDentalCheckDate || undefined,
       });
-      toast.success('원생 정보가 수정되었습니다');
+      toast.success(t('updateSuccess'));
       setIsEditOpen(false);
       loadStudents();
       loadStats();
     } catch (err: any) {
-      toast.error(err.message || '수정에 실패했습니다');
+      toast.error(err.message || t('updateFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -251,7 +251,7 @@ export default function StudentsPage() {
 
       const student = await api.post('/students', dto);
 
-      // 반 배정 (생성 후)
+      // Class assignment (after creation)
       if (form.classId) {
         await api.post(`/classes/${form.classId}/students`, { studentId: student.id });
       }
@@ -275,7 +275,7 @@ export default function StudentsPage() {
 
   const handleWithdraw = async () => {
     if (!withdrawTarget || !withdrawReason.trim()) {
-      toast.error('퇴원 사유를 입력해 주세요');
+      toast.error(t('withdrawReason'));
       return;
     }
     try {
@@ -284,14 +284,14 @@ export default function StudentsPage() {
         status: 'WITHDRAWN',
         reason: withdrawReason,
       });
-      toast.success(`${withdrawTarget.lastName} ${withdrawTarget.firstName} 원생이 퇴원 처리되었습니다`);
+      toast.success(t('withdrawSuccess'));
       setWithdrawTarget(null);
       setWithdrawReason('');
       setIsDetailOpen(false);
       loadStudents();
       loadStats();
     } catch (err: any) {
-      toast.error(err.message || '퇴원 처리에 실패했습니다');
+      toast.error(err.message || t('withdrawFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -299,7 +299,7 @@ export default function StudentsPage() {
 
   const handleReactivate = async () => {
     if (!reactivateTarget || !reactivateReason.trim()) {
-      toast.error('재입원 사유를 입력해 주세요');
+      toast.error(t('reactivateReason'));
       return;
     }
     try {
@@ -307,14 +307,14 @@ export default function StudentsPage() {
       await api.patch(`/students/${reactivateTarget.id}/reactivate`, {
         reason: reactivateReason,
       });
-      toast.success(`${reactivateTarget.lastName} ${reactivateTarget.firstName} 원생이 재입원 처리되었습니다`);
+      toast.success(t('reactivateSuccess'));
       setReactivateTarget(null);
       setReactivateReason('');
       setIsDetailOpen(false);
       loadStudents();
       loadStats();
     } catch (err: any) {
-      toast.error(err.message || '재입원 처리에 실패했습니다');
+      toast.error(err.message || t('reactivateFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -428,7 +428,7 @@ export default function StudentsPage() {
             <SelectItem value="BOTH">{t('both')}</SelectItem>
           </SelectContent>
         </Select>
-        {/* 퇴원생 포함 토글 */}
+        {/* Include withdrawn toggle */}
         <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none ml-2">
           <input
             type="checkbox"
@@ -589,7 +589,7 @@ export default function StudentsPage() {
 
             <Separator />
 
-            {/* 반 배정 */}
+            {/* Class assignment */}
             <div className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
               <GraduationCap className="h-4 w-4" /> {t('classAssignment')}
             </div>
@@ -680,15 +680,15 @@ export default function StudentsPage() {
               {selectedStudent.status !== 'WITHDRAWN' && (
                 <div className="flex gap-2 flex-wrap">
                   <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => openEditDialog(selectedStudent)}>
-                    <Pencil className="h-3 w-3" /> 수정
+                    <Pencil className="h-3 w-3" /> {t('edit')}
                   </Button>
                   <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-orange-600 border-orange-200 hover:bg-orange-50"
                     onClick={() => setWithdrawTarget(selectedStudent)}>
-                    <UserX className="h-3 w-3" /> 퇴원 처리
+                    <UserX className="h-3 w-3" /> {t('withdraw')}
                   </Button>
                   {isOwner && (!selectedStudent._count || selectedStudent._count.billings === 0) && (
                     <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => setDeleteStudentTarget(selectedStudent)}>
-                      <Trash2 className="h-3 w-3" /> 삭제
+                      <Trash2 className="h-3 w-3" /> {t('delete')}
                     </Button>
                   )}
                 </div>
@@ -697,11 +697,11 @@ export default function StudentsPage() {
                 <div className="flex gap-2 flex-wrap">
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 text-xs">
                     <UserX className="h-3.5 w-3.5" />
-                    퇴원일: {selectedStudent.withdrawDate ? new Date(selectedStudent.withdrawDate).toLocaleDateString() : '—'}
+                    {t('withdrawnDate')}: {selectedStudent.withdrawDate ? new Date(selectedStudent.withdrawDate).toLocaleDateString() : '—'}
                   </div>
                   <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                     onClick={() => setReactivateTarget(selectedStudent)}>
-                    <RotateCcw className="h-3 w-3" /> 재입원
+                    <RotateCcw className="h-3 w-3" /> {t('reactivate')}
                   </Button>
                 </div>
               )}
@@ -727,7 +727,7 @@ export default function StudentsPage() {
                 </div>
               </div>
 
-              {/* ─── 반 배정 관리 ─── */}
+              {/* ─── Class Assignment ─── */}
               <Separator />
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -757,7 +757,7 @@ export default function StudentsPage() {
                               try {
                                 await api.delete(`/classes/${cs.class.id}/students/${selectedStudent.id}`);
                                 setSelectedStudent(prev => prev ? { ...prev, classStudents: prev.classStudents.filter(c => c.class.id !== cs.class.id) } : null);
-                                toast.success(`${cs.class.name} 반에서 제외됨`);
+                                toast.success(t('removedFromClass'));
                                 loadStudents();
                               } catch (err: any) {
                                 toast.error(err.message || 'Failed to remove from class');
@@ -805,22 +805,22 @@ export default function StudentsPage() {
                 </>
               )}
 
-              {/* ─── 건강 정보 (알러지 / 구강검사) ─── */}
+              {/* ─── Health Information ─── */}
               <Separator />
               <div>
                 <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5 mb-2">
-                  <Stethoscope className="h-4 w-4" /> 건강 정보
+                  <Stethoscope className="h-4 w-4" /> {t('healthInfo')}
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30">
                     <div className="flex items-center gap-2">
                       <span>{selectedStudent.hasAllergy ? '⚠️' : '✅'}</span>
                       <div>
-                        <p className="text-sm font-medium">알러지</p>
+                        <p className="text-sm font-medium">{t('allergy')}</p>
                         <p className="text-xs text-muted-foreground">
                           {selectedStudent.hasAllergy
-                            ? selectedStudent.allergyDescription || '알러지 있음 (상세 정보 없음)'
-                            : '알러지 없음'}
+                            ? selectedStudent.allergyDescription || t('allergyYes')
+                            : t('allergyNo')}
                         </p>
                       </div>
                     </div>
@@ -829,90 +829,90 @@ export default function StudentsPage() {
                     <div className="flex items-center gap-2">
                       <span>🪷</span>
                       <div>
-                        <p className="text-sm font-medium">구강검사 (연 2회 의무)</p>
+                        <p className="text-sm font-medium">{t('dentalCheck')}</p>
                         <p className="text-xs text-muted-foreground">
-                          지난 검사: {selectedStudent.lastDentalCheckDate
+                          {t('lastCheck')}: {selectedStudent.lastDentalCheckDate
                             ? new Date(selectedStudent.lastDentalCheckDate).toLocaleDateString()
-                            : '미실시'}
+                            : t('notDone')}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          다음 검사: {selectedStudent.nextDentalCheckDate
+                          {t('nextCheck')}: {selectedStudent.nextDentalCheckDate
                             ? new Date(selectedStudent.nextDentalCheckDate).toLocaleDateString()
-                            : '미예정'}
+                            : t('notScheduled')}
                         </p>
                       </div>
                     </div>
                     {!selectedStudent.lastDentalCheckDate && (
-                      <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-200">미실시</Badge>
+                      <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-200">{t('notDone')}</Badge>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* 건강검진 관리 */}
+              {/* Health Management */}
               <Separator />
               <div className="space-y-3">
-                <p className="text-sm font-medium flex items-center gap-2"><Activity className="h-4 w-4 text-green-600" /> 건강관리</p>
+                <p className="text-sm font-medium flex items-center gap-2"><Activity className="h-4 w-4 text-green-600" /> {t('healthManagement')}</p>
                 <div className="grid grid-cols-2 gap-3">
                   <Button size="sm" variant="outline" className="h-8 text-xs gap-1" onClick={async () => {
                     try {
                       const dental = await api.get(`/students/${selectedStudent.id}/dental`);
                       const health = await api.get(`/students/${selectedStudent.id}/health`);
                       const info = [
-                        '🦷 구강검사 이력:',
-                        ...(dental.length > 0 ? dental.map((d: any) => `  ${d.year}년 ${d.round}차 (${new Date(d.checkDate).toLocaleDateString()}) - ${d.result || '결과 미입력'}${d.findings ? ` / ${d.findings}` : ''}`) : ['  기록 없음']),
+                        `🦷 ${t('dentalHistory')}:`,
+                        ...(dental.length > 0 ? dental.map((d: any) => `  ${d.year} R${d.round} (${new Date(d.checkDate).toLocaleDateString()}) - ${d.result || t('resultNotEntered')}${d.findings ? ` / ${d.findings}` : ''}`) : [`  ${t('noRecords')}`]),
                         '',
-                        '🏥 건강검진 이력:',
-                        ...(health.length > 0 ? health.map((h: any) => `  ${new Date(h.checkDate).toLocaleDateString()} - 키:${h.heightCm || '-'}cm, 몸무게:${h.weightKg || '-'}kg, 시력:${h.visionLeft || '-'}/${h.visionRight || '-'}${h.findings ? ` / ${h.findings}` : ''}`) : ['  기록 없음']),
+                        `🏥 ${t('healthCheckHistory')}:`,
+                        ...(health.length > 0 ? health.map((h: any) => `  ${new Date(h.checkDate).toLocaleDateString()} - ${t('heightLabel')}:${h.heightCm || '-'}cm, ${t('weightLabel')}:${h.weightKg || '-'}kg, ${t('visionLabel')}:${h.visionLeft || '-'}/${h.visionRight || '-'}${h.findings ? ` / ${h.findings}` : ''}`) : [`  ${t('noRecords')}`]),
                       ].join('\n');
                       alert(info);
-                    } catch { toast.error('조회 실패'); }
+                    } catch { toast.error(t('lookupFailed')); }
                   }}>
-                    <Eye className="h-3 w-3" /> 검진 이력 보기
+                    <Eye className="h-3 w-3" /> {t('viewHistory')}
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="sm" variant="outline" className="h-8 text-xs gap-1">
-                        <Plus className="h-3 w-3" /> 검진 기록 추가
+                        <Plus className="h-3 w-3" /> {t('addRecord')}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuItem onClick={() => {
                         const year = new Date().getFullYear();
-                        const round = prompt('회차 (1 또는 2):');
-                        if (!round || (round !== '1' && round !== '2')) { toast.error('1 또는 2를 입력해주세요'); return; }
-                        const result = prompt('검진 결과 (양호/치료필요/치료완료):') || '';
-                        const findings = prompt('특이사항:') || '';
-                        const dentist = prompt('검진 기관/의사:') || '';
+                        const round = prompt(t('roundPrompt'));
+                        if (!round || (round !== '1' && round !== '2')) { toast.error(t('roundError')); return; }
+                        const result = prompt(t('resultPrompt')) || '';
+                        const findings = prompt(t('findingsPrompt')) || '';
+                        const dentist = prompt(t('dentistPrompt')) || '';
                         api.post(`/students/${selectedStudent.id}/dental`, {
                           year, round: parseInt(round), checkDate: new Date().toISOString(),
                           result, findings, dentist,
-                        }).then(() => { toast.success('구강검사 기록 저장됨'); loadStudents(); }).catch((e: any) => toast.error(e.message));
+                        }).then(() => { toast.success(t('dentalSaved')); loadStudents(); }).catch((e: any) => toast.error(e.message));
                       }}>
-                        🦷 구강검사
+                        🦷 {t('dental')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
-                        const heightCm = prompt('키 (cm):');
-                        const weightKg = prompt('몸무게 (kg):');
-                        const visionLeft = prompt('좌안 시력 (예: 1.0):') || '';
-                        const visionRight = prompt('우안 시력 (예: 1.0):') || '';
-                        const bloodType = prompt('혈액형 (A/B/O/AB):') || '';
-                        const findings = prompt('특이사항:') || '';
+                        const heightCm = prompt(t('heightPrompt'));
+                        const weightKg = prompt(t('weightPrompt'));
+                        const visionLeft = prompt(t('visionLeftPrompt')) || '';
+                        const visionRight = prompt(t('visionRightPrompt')) || '';
+                        const bloodType = prompt(t('bloodTypePrompt')) || '';
+                        const findings = prompt(t('findingsPrompt')) || '';
                         api.post(`/students/${selectedStudent.id}/health`, {
                           checkDate: new Date().toISOString(),
                           heightCm: heightCm ? parseFloat(heightCm) : undefined,
                           weightKg: weightKg ? parseFloat(weightKg) : undefined,
                           visionLeft, visionRight, bloodType, findings,
-                        }).then(() => { toast.success('건강검진 기록 저장됨'); }).catch((e: any) => toast.error(e.message));
+                        }).then(() => { toast.success(t('healthSaved')); }).catch((e: any) => toast.error(e.message));
                       }}>
-                        🏥 건강검진
+                        🏥 {t('healthCheck')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </div>
 
-              {/* 퇴원생 안내 배너 */}
+              {/* Withdrawn student banner */}
               {selectedStudent.status === 'WITHDRAWN' && (
                 <>
                   <Separator />
@@ -957,11 +957,11 @@ export default function StudentsPage() {
                         alreadyAssigned ? 'border-emerald-300 bg-emerald-50/30 opacity-60' : 'border-muted hover:border-indigo-300 cursor-pointer hover:bg-indigo-50/20'
                       }`}
                       onClick={async () => {
-                        if (alreadyAssigned) return; // 중복 방지
+                        if (alreadyAssigned) return; // Prevent duplicate
                         try {
                           await api.post(`/classes/${cls.id}/students`, { studentId: selectedStudent.id });
                           setSelectedStudent(prev => prev ? { ...prev, classStudents: [...prev.classStudents, { class: cls }] } : null);
-                          toast.success(`${cls.name} 반에 배정됨`);
+                          toast.success(t('assignedToClass', { name: cls.name }));
                           setShowClassAssign(false);
                           loadStudents();
                         } catch (err: any) {
@@ -976,7 +976,7 @@ export default function StudentsPage() {
                         </div>
                       </div>
                       {alreadyAssigned ? (
-                        <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-200">배정됨 ✓</Badge>
+                        <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-200">{t('assignedCheck')}</Badge>
                       ) : (
                         <UserPlus className="h-4 w-4 text-muted-foreground" />
                       )}
@@ -996,10 +996,10 @@ export default function StudentsPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Pencil className="h-5 w-5" /> 원생 정보 수정</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Pencil className="h-5 w-5" /> {t('editTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="text-sm font-medium text-muted-foreground">기본 정보</div>
+            <div className="text-sm font-medium text-muted-foreground">{t('basicInfo')}</div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>{t('firstName')}</Label>
@@ -1046,9 +1046,9 @@ export default function StudentsPage() {
 
             <Separator />
 
-            {/* 건강 정보 */}
+            {/* Health Information */}
             <div className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-              <Stethoscope className="h-4 w-4" /> 건강 정보
+              <Stethoscope className="h-4 w-4" /> {t('healthInfo')}
             </div>
             <div className={`p-3 rounded-xl border-2 transition-all ${editForm.hasAllergy ? 'border-amber-300 bg-amber-50/30' : 'border-muted'}`}>
               <div className="flex items-center gap-2.5">
@@ -1057,12 +1057,12 @@ export default function StudentsPage() {
                   checked={editForm.hasAllergy}
                   onCheckedChange={(checked) => setEditForm({...editForm, hasAllergy: !!checked})}
                 />
-                <label htmlFor="hasAllergy" className="text-sm font-medium cursor-pointer">⚠️ 알러지 여부</label>
+                <label htmlFor="hasAllergy" className="text-sm font-medium cursor-pointer">⚠️ {t('allergyLabel')}</label>
               </div>
               {editForm.hasAllergy && (
                 <div className="mt-2 ml-7">
                   <Input
-                    placeholder="알러지 상세 (예: 땅콩, 새우, 계란 등)"
+                    placeholder={t('allergyPlaceholder')}
                     value={editForm.allergyDescription}
                     onChange={(e) => setEditForm({...editForm, allergyDescription: e.target.value})}
                   />
@@ -1071,14 +1071,14 @@ export default function StudentsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">🪷 구강검사 (연 2회 의무)</Label>
+              <Label className="flex items-center gap-1.5">🪷 {t('dentalCheck')}</Label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">지난 검사일</Label>
+                  <Label className="text-xs text-muted-foreground">{t('lastCheckDate')}</Label>
                   <Input type="date" value={editForm.lastDentalCheckDate} onChange={(e) => setEditForm({...editForm, lastDentalCheckDate: e.target.value})} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">다음 검사 예정일</Label>
+                  <Label className="text-xs text-muted-foreground">{t('nextCheckDate')}</Label>
                   <Input type="date" value={editForm.nextDentalCheckDate} onChange={(e) => setEditForm({...editForm, nextDentalCheckDate: e.target.value})} />
                 </div>
               </div>
@@ -1088,13 +1088,13 @@ export default function StudentsPage() {
 
             <div className="space-y-1.5">
               <Label>{t('notes')}</Label>
-              <Input value={editForm.note} onChange={(e) => setEditForm({...editForm, note: e.target.value})} placeholder="비고 입력" />
+              <Input value={editForm.note} onChange={(e) => setEditForm({...editForm, note: e.target.value})} placeholder={t('notesPlaceholder')} />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>{t('cancel')}</Button>
             <Button onClick={handleEditStudent} className="bg-indigo-600 hover:bg-indigo-500 text-white">
-              <Save className="h-4 w-4 mr-2" /> 저장
+              <Save className="h-4 w-4 mr-2" /> {t('save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1104,27 +1104,27 @@ export default function StudentsPage() {
       <AlertDialog open={!!deleteStudentTarget} onOpenChange={(open) => !open && setDeleteStudentTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>원생 삭제 확인</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteStudentTarget?.lastName} {deleteStudentTarget?.firstName} 원생을 완전히 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+              {t('deleteConfirmDesc', { name: `${deleteStudentTarget?.lastName} ${deleteStudentTarget?.firstName}` })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction className="bg-red-600 hover:bg-red-500 text-white" onClick={async () => {
               if (!deleteStudentTarget) return;
               try {
                 await api.delete(`/students/${deleteStudentTarget.id}`);
-                toast.success('원생이 삭제되었습니다');
+                toast.success(t('deleteSuccess'));
                 setDeleteStudentTarget(null);
                 setSelectedStudent(null);
                 loadStudents();
                 loadStats();
               } catch (err: any) {
-                toast.error(err.message || '삭제 실패');
+                toast.error(err.message || t('deleteFailed'));
               }
             }}>
-              삭제
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1135,7 +1135,7 @@ export default function StudentsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-orange-600">
-              <UserX className="h-5 w-5" /> 퇴원 처리
+              <UserX className="h-5 w-5" /> {t('withdraw')}
             </DialogTitle>
           </DialogHeader>
           {withdrawTarget && (
@@ -1145,27 +1145,27 @@ export default function StudentsPage() {
                   {withdrawTarget.lastName} {withdrawTarget.firstName} ({withdrawTarget.studentCode})
                 </p>
                 <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                  퇴원 처리 시 모든 반 배정이 해제됩니다. 이후 수정은 불가하며 재입원만 가능합니다.
+                  {t('withdrawNotice')}
                 </p>
               </div>
               <div className="space-y-1.5">
-                <Label>퇴원 사유 <span className="text-red-500">*</span></Label>
+                <Label>{t('withdrawReasonLabel')} <span className="text-red-500">*</span></Label>
                 <Input
                   value={withdrawReason}
                   onChange={(e) => setWithdrawReason(e.target.value)}
-                  placeholder="예: 졸업, 전원, 개인 사유 등"
+                  placeholder={t('withdrawReasonPlaceholder')}
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setWithdrawTarget(null); setWithdrawReason(''); }}>취소</Button>
+            <Button variant="outline" onClick={() => { setWithdrawTarget(null); setWithdrawReason(''); }}>{t('cancel')}</Button>
             <Button
               onClick={handleWithdraw}
               disabled={!withdrawReason.trim()}
               className="bg-orange-600 hover:bg-orange-500 text-white"
             >
-              <UserX className="h-4 w-4 mr-2" /> 퇴원 처리
+              <UserX className="h-4 w-4 mr-2" /> {t('withdraw')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1176,7 +1176,7 @@ export default function StudentsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-emerald-600">
-              <RotateCcw className="h-5 w-5" /> 재입원 처리
+              <RotateCcw className="h-5 w-5" /> {t('reactivateTitle')}
             </DialogTitle>
           </DialogHeader>
           {reactivateTarget && (
@@ -1186,30 +1186,30 @@ export default function StudentsPage() {
                   {reactivateTarget.lastName} {reactivateTarget.firstName} ({reactivateTarget.studentCode})
                 </p>
                 <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                  퇴원일: {reactivateTarget.withdrawDate ? new Date(reactivateTarget.withdrawDate).toLocaleDateString() : '—'}
+                  {t('withdrawnDate')}: {reactivateTarget.withdrawDate ? new Date(reactivateTarget.withdrawDate).toLocaleDateString() : '—'}
                 </p>
                 <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                  재입원 시 PENDING 상태로 전환됩니다. 반 배정은 별도로 진행해 주세요.
+                  {t('reactivateNotice')}
                 </p>
               </div>
               <div className="space-y-1.5">
-                <Label>재입원 사유 <span className="text-red-500">*</span></Label>
+                <Label>{t('reactivateReasonLabel')} <span className="text-red-500">*</span></Label>
                 <Input
                   value={reactivateReason}
                   onChange={(e) => setReactivateReason(e.target.value)}
-                  placeholder="예: 복원, 재등록, 전입 등"
+                  placeholder={t('reactivateReasonPlaceholder')}
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setReactivateTarget(null); setReactivateReason(''); }}>취소</Button>
+            <Button variant="outline" onClick={() => { setReactivateTarget(null); setReactivateReason(''); }}>{t('cancel')}</Button>
             <Button
               onClick={handleReactivate}
               disabled={!reactivateReason.trim()}
               className="bg-emerald-600 hover:bg-emerald-500 text-white"
             >
-              <RotateCcw className="h-4 w-4 mr-2" /> 재입원 처리
+              <RotateCcw className="h-4 w-4 mr-2" /> {t('reactivateTitle')}
             </Button>
           </DialogFooter>
         </DialogContent>

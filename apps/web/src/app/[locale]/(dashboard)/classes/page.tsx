@@ -191,7 +191,7 @@ export default function ClassesPage() {
 
   const handleEditClass = async () => {
     if (!selectedClass || !editForm.name) {
-      toast.error('반 이름은 필수입니다');
+      toast.error(t('nameRequired'));
       return;
     }
     try {
@@ -202,12 +202,12 @@ export default function ClassesPage() {
         description: editForm.description || undefined,
         capacity: parseInt(editForm.capacity) || 20,
       });
-      toast.success('반 정보가 수정되었습니다');
+      toast.success(t('updateSuccess'));
       setIsEditing(false);
       setSelectedClass(null);
       loadClasses();
     } catch (err: any) {
-      toast.error(err.message || '반 수정에 실패했습니다');
+      toast.error(err.message || t('updateFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -396,7 +396,7 @@ export default function ClassesPage() {
           </DialogHeader>
           {selectedClass && (
             <div className="space-y-4 py-2">
-              {/* 수정 모드 / 보기 모드 */}
+              {/* Edit mode / View mode */}
               {isEditing ? (
                 <div className="space-y-3">
                   <div className="space-y-1.5">
@@ -424,7 +424,7 @@ export default function ClassesPage() {
                   <div className="flex gap-2 pt-2">
                     <Button variant="outline" size="sm" onClick={() => setIsEditing(false)} className="flex-1">{t('cancel')}</Button>
                     <Button size="sm" onClick={handleEditClass} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white">
-                      <Save className="h-3.5 w-3.5 mr-1" /> 저장
+                      <Save className="h-3.5 w-3.5 mr-1" /> {t('save')}
                     </Button>
                   </div>
                 </div>
@@ -436,11 +436,11 @@ export default function ClassesPage() {
                       {selectedClass.studentCount} / {selectedClass.capacity} {t('students')}
                     </span>
                     <Button size="sm" variant="outline" className="h-7 text-xs gap-1 ml-auto" onClick={() => openEditMode(selectedClass)}>
-                      <Pencil className="h-3 w-3" /> 수정
+                      <Pencil className="h-3 w-3" /> {t('edit')}
                     </Button>
                     {isOwner && selectedClass.studentCount === 0 && (
                       <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => setDeleteTarget(selectedClass)}>
-                        <Trash2 className="h-3 w-3" /> 삭제
+                        <Trash2 className="h-3 w-3" /> {t('delete')}
                       </Button>
                     )}
                   </div>
@@ -458,7 +458,7 @@ export default function ClassesPage() {
                     <GraduationCap className="h-4 w-4" /> {t('teachers')}
                   </h4>
                   <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setShowAddTeacher(true)}>
-                    <UserPlus className="h-3 w-3" /> 교사 배정
+                    <UserPlus className="h-3 w-3" /> {t('assignTeacher')}
                   </Button>
                 </div>
                 {selectedClass.teachers.length > 0 ? (
@@ -484,7 +484,7 @@ export default function ClassesPage() {
                                   ...prev,
                                   teachers: prev.teachers.filter(t => t.id !== teacher.id),
                                 } : null);
-                                toast.success(`${teacher.name} 교사 해제됨`);
+                                toast.success(t('teacherRemoved'));
                                 loadClasses();
                               } catch (err: any) {
                                 toast.error(err.message || 'Failed to remove teacher');
@@ -529,7 +529,7 @@ export default function ClassesPage() {
                                 students: prev.students.filter(s => s.id !== student.id),
                                 studentCount: prev.studentCount - 1,
                               } : null);
-                              toast.success(`${student.name} 제외됨`);
+                              toast.success(t('studentRemoved'));
                               loadClasses();
                             } catch (err: any) {
                               toast.error(err.message || 'Failed to remove student');
@@ -554,7 +554,7 @@ export default function ClassesPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5" /> {selectedClass?.name} — 원생 추가
+              <UserPlus className="h-5 w-5" /> {t('addStudentTo', { name: selectedClass?.name || '' })}
             </DialogTitle>
           </DialogHeader>
           {selectedClass && (
@@ -575,7 +575,7 @@ export default function ClassesPage() {
                           students: [...prev.students, { id: student.id, name: student.name, code: student.code }],
                           studentCount: prev.studentCount + 1,
                         } : null);
-                        toast.success(`${student.name} → ${selectedClass.name} 배정됨`);
+                        toast.success(t('studentAssigned'));
                         setShowAddStudent(false);
                         loadClasses();
                       } catch (err: any) {
@@ -587,7 +587,7 @@ export default function ClassesPage() {
                       <p className="text-xs text-muted-foreground font-mono">{student.code}</p>
                     </div>
                     {alreadyIn ? (
-                      <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-200">배정됨 ✓</Badge>
+                      <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-200">{t('assigned')}</Badge>
                     ) : (
                       <UserPlus className="h-4 w-4 text-muted-foreground" />
                     )}
@@ -607,7 +607,7 @@ export default function ClassesPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" /> {selectedClass?.name} — 교사 배정
+              <GraduationCap className="h-5 w-5" /> {t('addTeacherTo', { name: selectedClass?.name || '' })}
             </DialogTitle>
           </DialogHeader>
           {selectedClass && (
@@ -627,7 +627,7 @@ export default function ClassesPage() {
                           ...prev,
                           teachers: [...prev.teachers, { id: teacher.id, name: teacher.name, isPrimary: prev.teachers.length === 0 }],
                         } : null);
-                        toast.success(`${teacher.name} → ${selectedClass.name} 교사 배정됨`);
+                        toast.success(t('teacherAssigned'));
                         setShowAddTeacher(false);
                         loadClasses();
                       } catch (err: any) {
@@ -646,7 +646,7 @@ export default function ClassesPage() {
                       </div>
                     </div>
                     {alreadyAssigned ? (
-                      <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-200">배정됨 ✓</Badge>
+                      <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-200">{t('assigned')}</Badge>
                     ) : (
                       <UserPlus className="h-4 w-4 text-muted-foreground" />
                     )}
@@ -664,26 +664,26 @@ export default function ClassesPage() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>반 삭제 확인</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{deleteTarget?.name}&quot; 반을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+              {t('deleteConfirmDesc', { name: deleteTarget?.name || '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction className="bg-red-600 hover:bg-red-500 text-white" onClick={async () => {
               if (!deleteTarget) return;
               try {
                 await api.delete(`/classes/${deleteTarget.id}`);
-                toast.success('반이 삭제되었습니다');
+                toast.success(t('deleteSuccess'));
                 setDeleteTarget(null);
                 setSelectedClass(null);
                 loadClasses();
               } catch (err: any) {
-                toast.error(err.message || '삭제 실패');
+                toast.error(err.message || t('deleteFailed'));
               }
             }}>
-              삭제
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

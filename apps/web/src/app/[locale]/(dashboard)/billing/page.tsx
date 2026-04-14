@@ -59,19 +59,19 @@ interface FeeItem {
 }
 
 const FEE_ITEMS: FeeItem[] = [
-  { category: 'TUITION', label: '원비 (Tuition)', defaultAmount: 4_000_000, emoji: '🎓' },
-  { category: 'SHUTTLE', label: '셔틀비 (Shuttle)', defaultAmount: 600_000, emoji: '🚌' },
-  { category: 'LUNCH', label: '중식비 (Lunch)', defaultAmount: 500_000, emoji: '🍱' },
-  { category: 'SNACK', label: '스낵비 (Snack)', defaultAmount: 200_000, emoji: '🍪' },
-  { category: 'TEXTBOOK', label: '교재비 (Textbook)', defaultAmount: 300_000, emoji: '📚' },
-  { category: 'ACTIVITY', label: '특별활동비 (Activity)', defaultAmount: 500_000, emoji: '⚽' },
+  { category: 'TUITION', label: 'cat_TUITION', defaultAmount: 4_000_000, emoji: '🎓' },
+  { category: 'SHUTTLE', label: 'cat_SHUTTLE', defaultAmount: 600_000, emoji: '🚌' },
+  { category: 'LUNCH', label: 'cat_LUNCH', defaultAmount: 500_000, emoji: '🍱' },
+  { category: 'SNACK', label: 'cat_SNACK', defaultAmount: 200_000, emoji: '🍪' },
+  { category: 'TEXTBOOK', label: 'cat_TEXTBOOK', defaultAmount: 300_000, emoji: '📚' },
+  { category: 'ACTIVITY', label: 'cat_ACTIVITY', defaultAmount: 500_000, emoji: '⚽' },
 ];
 
 // ─── Billing Data ───
 interface BillingItem {
   category: FeeCategory;
   itemName: string;
-  months: number;          // 납부 개월 (1~12)
+  months: number;          // Payment months (1~12)
   monthlyAmount: number;
   totalAmount: number;
   paidAmount: number;
@@ -216,9 +216,9 @@ export default function BillingPage() {
 
   const handleCreateBilling = async () => {
     const student = students.find(s => s.id === createStudent);
-    if (!student) { toast.error('원생을 선택하세요'); return; }
+    if (!student) { toast.error(t('selectStudentError')); return; }
     const selectedFees = FEE_ITEMS.filter(fi => createFees[fi.category].checked);
-    if (selectedFees.length === 0) { toast.error('청구 항목을 선택하세요'); return; }
+    if (selectedFees.length === 0) { toast.error(t('selectFeesError')); return; }
 
     const items = selectedFees.map(fi => {
       const cfg = createFees[fi.category];
@@ -240,7 +240,7 @@ export default function BillingPage() {
       setCreateFees(
         Object.fromEntries(FEE_ITEMS.map(fi => [fi.category, { checked: fi.category === 'TUITION', months: 1, customAmount: fi.defaultAmount }])) as any
       );
-      toast.success(`${student.name} 청구 생성 완료`);
+      toast.success(t('createSuccess'));
       loadBillings();
     } catch (err: any) {
       toast.error(err.message || 'Failed to create billing');
@@ -266,7 +266,7 @@ export default function BillingPage() {
   const handlePayment = async () => {
     if (!paymentTarget || !paymentMethod) { toast.error(t('selectMethodFirst')); return; }
     const amount = getPaymentTotal();
-    if (amount <= 0) { toast.error('납부할 항목을 선택하세요'); return; }
+    if (amount <= 0) { toast.error(t('selectPayItemsError')); return; }
 
     try {
       setIsLoading(true);
@@ -295,7 +295,7 @@ export default function BillingPage() {
       await api.patch(`/billing/${billing.id}/issue`, {
         dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       });
-      toast.success('청구서가 발행되었습니다');
+      toast.success(t('issuedSuccess'));
       setSelectedBilling(null);
       loadBillings();
     } catch (err: any) {
@@ -307,12 +307,12 @@ export default function BillingPage() {
 
   // ─── Cancel Billing ───
   const handleCancelBilling = async (billing: BillingData) => {
-    const reason = window.prompt('취소 사유를 입력하세요:');
+    const reason = window.prompt(t('cancelReason'));
     if (!reason) return;
     try {
       setIsLoading(true);
       await api.patch(`/billing/${billing.id}/cancel`, { reason });
-      toast.success('청구서가 취소되었습니다');
+      toast.success(t('cancelledSuccess'));
       setSelectedBilling(null);
       loadBillings();
     } catch (err: any) {
@@ -544,7 +544,7 @@ export default function BillingPage() {
             <div className="space-y-1.5">
               <Label>{t('studentLabel')}</Label>
               <Select value={createStudent} onValueChange={(v) => setCreateStudent(v ?? '')}>
-                <SelectTrigger><SelectValue placeholder="원생 선택..." /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t('selectStudent')} /></SelectTrigger>
                 <SelectContent>
                   {students.map(s => (
                     <SelectItem key={s.id} value={s.id}>{s.name} ({s.code})</SelectItem>
@@ -557,7 +557,7 @@ export default function BillingPage() {
 
             {/* Fee Items with Month Selector */}
             <div>
-              <Label className="mb-3 block">청구 항목 및 개월 수</Label>
+              <Label className="mb-3 block">{t('feeItems')}</Label>
               <div className="space-y-2.5">
                 {FEE_ITEMS.map((fi) => {
                   const cfg = createFees[fi.category];
@@ -576,13 +576,13 @@ export default function BillingPage() {
                             {fi.emoji} {fi.label}
                           </label>
                         </div>
-                        <span className="text-xs text-muted-foreground">기본 {formatVND(fi.defaultAmount)}/월</span>
+                        <span className="text-xs text-muted-foreground">{t('defaultAmount', { amount: formatVND(fi.defaultAmount) })}</span>
                       </div>
                       {cfg.checked && (
                         <div className="mt-3 ml-7 space-y-2">
-                          {/* 금액 입력 */}
+                          {/* Amount input */}
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground min-w-[50px]">월 금액:</span>
+                            <span className="text-xs text-muted-foreground min-w-[50px]">{t('monthlyAmount')}</span>
                             <Input
                               type="number"
                               className="h-8 w-36 text-sm"
@@ -594,11 +594,11 @@ export default function BillingPage() {
                             />
                             <span className="text-xs text-muted-foreground">₫</span>
                           </div>
-                          {/* 개월 수 */}
+                          {/* Months */}
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1.5">
                               <CalendarRange className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">납부기간:</span>
+                              <span className="text-xs text-muted-foreground">{t('paymentPeriod')}</span>
                             </div>
                             <Select value={String(cfg.months)} onValueChange={(v) =>
                               setCreateFees(prev => ({ ...prev, [fi.category]: { ...prev[fi.category], months: Number(v) } }))
@@ -606,7 +606,7 @@ export default function BillingPage() {
                               <SelectTrigger className="h-8 w-24 text-sm"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                                  <SelectItem key={m} value={String(m)}>{m}개월</SelectItem>
+                                  <SelectItem key={m} value={String(m)}>{t('monthsUnit', { count: m })}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -655,7 +655,7 @@ export default function BillingPage() {
 
               {/* Select Items to Pay */}
               <div>
-                <Label className="mb-2 block text-sm font-medium">납부 항목 선택</Label>
+                <Label className="mb-2 block text-sm font-medium">{t('paymentItems')}</Label>
                 <div className="space-y-2">
                   {paymentTarget.items.filter(i => !i.isPaid).map((item) => {
                     const selected = paymentSelectedItems.includes(item.category);
@@ -672,7 +672,7 @@ export default function BillingPage() {
                             <span className="text-sm font-medium">{fi?.emoji} {item.itemName}</span>
                           </div>
                           <div className="text-right">
-                            {item.months > 1 && <p className="text-[10px] text-muted-foreground">{item.months}개월</p>}
+                            {item.months > 1 && <p className="text-[10px] text-muted-foreground">{t('monthsUnit', { count: item.months })}</p>}
                             <p className="text-sm font-semibold">{formatVND(item.totalAmount - item.paidAmount)}</p>
                           </div>
                         </div>
@@ -681,7 +681,7 @@ export default function BillingPage() {
                   })}
                   {paymentTarget.items.filter(i => i.isPaid).length > 0 && (
                     <div className="mt-2">
-                      <p className="text-xs text-muted-foreground mb-1">✅ 납부 완료</p>
+                      <p className="text-xs text-muted-foreground mb-1">{t('allPaid')}</p>
                       {paymentTarget.items.filter(i => i.isPaid).map(item => (
                         <div key={item.category} className="flex items-center justify-between p-2 rounded-lg bg-emerald-50/50 opacity-60 mb-1">
                           <span className="text-xs">{FEE_ITEMS.find(f => f.category === item.category)?.emoji} {item.itemName}</span>
@@ -723,7 +723,7 @@ export default function BillingPage() {
 
               {/* Total */}
               <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50">
-                <span className="font-medium">납부 금액</span>
+                <span className="font-medium">{t('paymentAmount')}</span>
                 <span className="text-xl font-bold text-emerald-600">{formatVND(getPaymentTotal())}</span>
               </div>
             </div>
@@ -769,16 +769,16 @@ export default function BillingPage() {
                         <div>
                           <p className="text-sm font-medium">{item.itemName}</p>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            {item.months > 1 && <span className="flex items-center gap-0.5"><CalendarRange className="h-3 w-3" />{item.months}개월</span>}
-                            <span>{formatVND(item.monthlyAmount)}/월</span>
+                            {item.months > 1 && <span className="flex items-center gap-0.5"><CalendarRange className="h-3 w-3" />{t('monthsUnit', { count: item.months })}</span>}
+                            <span>{formatVND(item.monthlyAmount)}/mo</span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">{formatVND(item.totalAmount)}</p>
                         {item.isPaid
-                          ? <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-200">납부 ✓</Badge>
-                          : <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-200">미납</Badge>
+                          ? <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-200">{t('paidCheck')}</Badge>
+                          : <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-200">{t('unpaid')}</Badge>
                         }
                       </div>
                     </div>
@@ -846,11 +846,11 @@ export default function BillingPage() {
                   <div className="flex gap-2">
                     <Button className="flex-1 bg-blue-600 hover:bg-blue-500 text-white"
                       onClick={() => handleIssueBilling(selectedBilling)}>
-                      <FileText className="h-4 w-4 mr-2" /> 발행 (ISSUE)
+                      <FileText className="h-4 w-4 mr-2" /> {t('issue')}
                     </Button>
                     <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50"
                       onClick={() => handleCancelBilling(selectedBilling)}>
-                      <XCircle className="h-4 w-4 mr-1" /> 취소
+                      <XCircle className="h-4 w-4 mr-1" /> {t('cancelBtn')}
                     </Button>
                     {isOwner && (
                       <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setDeleteBillingTarget(selectedBilling)}>
@@ -899,26 +899,26 @@ export default function BillingPage() {
       <AlertDialog open={!!deleteBillingTarget} onOpenChange={(open) => !open && setDeleteBillingTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>청구서 삭제 확인</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              이 청구서를 완전히 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+              {t('deleteConfirmDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancelBtn')}</AlertDialogCancel>
             <AlertDialogAction className="bg-red-600 hover:bg-red-500 text-white" onClick={async () => {
               if (!deleteBillingTarget) return;
               try {
                 await api.delete(`/billing/${deleteBillingTarget.id}`);
-                toast.success('청구서가 삭제되었습니다');
+                toast.success(t('deleteSuccess'));
                 setDeleteBillingTarget(null);
                 setSelectedBilling(null);
                 loadBillings();
               } catch (err: any) {
-                toast.error(err.message || '삭제 실패');
+                toast.error(err.message || t('deleteFailed'));
               }
             }}>
-              삭제
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
