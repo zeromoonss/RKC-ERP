@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Building2, CreditCard, Mail, Globe, Calendar, Save,
-  DollarSign, Bell, Loader2, Lock,
+  DollarSign, Bell, Loader2, Lock, Trash2, FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +48,11 @@ export default function SettingsPage() {
   const [confirmPw, setConfirmPw] = useState('');
   const [changingPw, setChangingPw] = useState(false);
 
+  // Billing templates
+  const [templates, setTemplates] = useState<Array<{ id: string; name: string; amount: number; programType: string }>>([] );
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [deletingTemplates, setDeletingTemplates] = useState(false);
+
   const loadSettings = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -76,6 +81,44 @@ export default function SettingsPage() {
   }, []);
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
+
+  // Load billing templates
+  const loadTemplates = useCallback(async () => {
+    try {
+      setLoadingTemplates(true);
+      const data = await api.get<any[]>('/billing/templates/all');
+      setTemplates(data);
+    } catch (err) {
+      console.error('Failed to load templates:', err);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  }, []);
+
+  useEffect(() => { loadTemplates(); }, [loadTemplates]);
+
+  const handleDeleteTemplate = async (id: string) => {
+    try {
+      await api.delete(`/billing/templates/${id}`);
+      toast.success(t('templateDeleted'));
+      loadTemplates();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete');
+    }
+  };
+
+  const handleDeleteAllTemplates = async () => {
+    try {
+      setDeletingTemplates(true);
+      await api.delete('/billing/templates/all');
+      toast.success(t('allTemplatesDeleted'));
+      setTemplates([]);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete');
+    } finally {
+      setDeletingTemplates(false);
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -235,6 +278,63 @@ export default function SettingsPage() {
               <Switch checked={autoReminder} onCheckedChange={setAutoReminder} />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* ─── Billing Templates ─── */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileText className="h-5 w-5 text-violet-600" />
+              {t('billingTemplates')}
+            </CardTitle>
+            {templates.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDeleteAllTemplates}
+                disabled={deletingTemplates}
+                className="border-red-200 text-red-600 hover:bg-red-50"
+              >
+                {deletingTemplates ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1.5" />}
+                {t('deleteAll')}
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">{t('billingTemplatesHint')}</p>
+        </CardHeader>
+        <CardContent>
+          {loadingTemplates ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : templates.length === 0 ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              {t('noTemplates')}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {templates.map((tmpl) => (
+                <div key={tmpl.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="text-sm font-medium">{tmpl.name}</p>
+                      <p className="text-xs text-muted-foreground">{tmpl.programType} · {new Intl.NumberFormat('vi-VN').format(tmpl.amount)} ₫</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteTemplate(tmpl.id)}
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -98,5 +98,27 @@ export class BillingController {
   ) {
     return this.billingService.cancel(id, body.reason, userId);
   }
-}
 
+  // ─── Billing Templates ───
+
+  @Get('templates/all')
+  @RequirePermissions(PERMISSIONS.BILLING_VIEW)
+  async getTemplates() {
+    return this.billingService.getTemplates();
+  }
+
+  @Delete('templates/all')
+  @RequirePermissions(PERMISSIONS.BILLING_DELETE)
+  async deleteAllTemplates(@CurrentUser('sub') userId: string) {
+    return this.billingService.deleteAllTemplates(userId);
+  }
+
+  @Delete('templates/:templateId')
+  @RequirePermissions(PERMISSIONS.BILLING_DELETE)
+  async deleteTemplate(
+    @Param('templateId') templateId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.billingService.deleteTemplate(templateId, userId);
+  }
+}

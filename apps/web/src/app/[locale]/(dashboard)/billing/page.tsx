@@ -115,6 +115,7 @@ export default function BillingPage() {
   const t = useTranslations('billing');
   const { user } = useAuth();
   const isOwner = user?.role?.code === 'OWNER';
+  const isAdmin = user?.role?.code === 'ADMIN';
   const [billings, setBillings] = useState<BillingData[]>([]);
   const [students, setStudents] = useState<StudentListItem[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -852,7 +853,7 @@ export default function BillingPage() {
                       onClick={() => handleCancelBilling(selectedBilling)}>
                       <XCircle className="h-4 w-4 mr-1" /> {t('cancelBtn')}
                     </Button>
-                    {isOwner && (
+                    {(isOwner || isAdmin) && (
                       <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setDeleteBillingTarget(selectedBilling)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>

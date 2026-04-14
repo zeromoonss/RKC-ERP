@@ -459,5 +459,46 @@ export class BillingService {
       }, {} as Record<string, any>),
     };
   }
-}
 
+  // ─── Billing Templates ───
+
+  async getTemplates() {
+    return this.prisma.billingTemplate.findMany({
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
+  async deleteTemplate(templateId: string, userId: string) {
+    const template = await this.prisma.billingTemplate.findUnique({
+      where: { id: templateId },
+    });
+    if (!template) throw new NotFoundException('Billing template not found');
+
+    await this.prisma.billingTemplate.delete({ where: { id: templateId } });
+
+    await this.auditService.log({
+      userId,
+      action: AuditAction.DELETE,
+      entity: 'billingTemplate',
+      entityId: templateId,
+      details: { name: template.name, amount: template.amount },
+    });
+
+    return { message: 'Template deleted successfully' };
+  }
+
+  async deleteAllTemplates(userId: string) {
+    const count = await this.prisma.billingTemplate.count();
+    await this.prisma.billingTemplate.deleteMany();
+
+    await this.auditService.log({
+      userId,
+      action: AuditAction.DELETE,
+      entity: 'billingTemplate',
+      entityId: 'all',
+      details: { deletedCount: count },
+    });
+
+    return { message: `${count} templates deleted`, deletedCount: count };
+  }
+}
