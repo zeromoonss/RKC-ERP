@@ -380,21 +380,19 @@ export class BillingService {
     return this.findOne(id);
   }
 
-  // ─── DELETE (오너 전용) ───
+  // ─── DELETE (Owner / Admin) ───
   async delete(id: string, userId: string) {
     const billing = await this.prisma.billing.findUnique({
       where: { id },
-      include: { _count: { select: { payments: true } } },
+      include: {
+        student: { select: { firstName: true, lastName: true, studentCode: true } },
+        _count: { select: { payments: true } },
+      },
     });
     if (!billing) throw new NotFoundException('Billing not found');
 
-    if (billing._count.payments > 0) {
-      throw new BadRequestException(
-        '결제 이력이 있는 청구서는 삭제할 수 없습니다. 취소 처리를 사용해주세요.',
-      );
-    }
-
     await this.prisma.$transaction(async (tx) => {
+      await tx.payment.deleteMany({ where: { billingId: id } });
       await tx.billingItem.deleteMany({ where: { billingId: id } });
       await tx.receivable.deleteMany({ where: { billingId: id } });
       await tx.invoice.deleteMany({ where: { billingId: id } });

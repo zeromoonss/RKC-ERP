@@ -853,11 +853,6 @@ export default function BillingPage() {
                       onClick={() => handleCancelBilling(selectedBilling)}>
                       <XCircle className="h-4 w-4 mr-1" /> {t('cancelBtn')}
                     </Button>
-                    {(isOwner || isAdmin) && (
-                      <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setDeleteBillingTarget(selectedBilling)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
                   </div>
                 </>
               )}
@@ -879,6 +874,17 @@ export default function BillingPage() {
                       </Button>
                     )}
                   </div>
+                </>
+              )}
+
+              {/* Delete Button — always visible for OWNER / ADMIN */}
+              {(isOwner || isAdmin) && (
+                <>
+                  <Separator />
+                  <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                    onClick={() => setDeleteBillingTarget(selectedBilling)}>
+                    <Trash2 className="h-4 w-4 mr-2" /> {t('delete')}
+                  </Button>
                 </>
               )}
 
